@@ -1,4 +1,36 @@
 $(document).ready(function(){
+
+    var table = $('#user_table').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'csv',
+                text: 'Copy all data',
+                exportOptions: {
+                    modifier: {
+                        search: 'none'
+                    }
+                }
+            }
+        ],
+        'columns': [
+             
+            {data: 'id_usuario'},
+            {data: 'nick'},
+            {data: 'nombre'},
+            {data: 'correo'},
+            {
+                data:'id_usuario',
+                orderable:false,
+                render:function(data){
+                    return ` <a class='update btn btn-warning' data-id='${data}'> modificar </a> - - <a class='delete btn btn-danger' data-id='${data}' >Borrar</a>   </td>`;
+                }
+            }
+        ],
+        bFilter: true,
+    });
+
+
     cargaTablaUsuarios();
 
     function cargaTablaUsuarios(){
@@ -9,19 +41,9 @@ $(document).ready(function(){
             contentType:"application/json;charset='utf8'",
             data:{},
             complete: function(datos) {
-                console.log(datos.responseJSON);
-                $("#usuarios").empty();
-                $.each(datos.responseJSON,function(i,v){
-                    $("#usuarios").append(
-                `<tr>
-                        <td>${v.id_usuario}</td>
-                        <td>${v.nick}</td>
-                        <td>${v.nombre}</td>
-                        <td>${v.correo}</td>
-                        <td> <a class='update' data-id='${v.id_usuario}'> modificar </a> - - <a class='delete' data-id='${v.id_usuario}' >Borrar</a>   </td>
-                    </tr>` 
-                );
-                })
+                table.clear().draw();
+                table.rows.add(datos.responseJSON);
+                table.columns.adjust().draw();
             },
             error:function(err){
             
@@ -39,6 +61,9 @@ $(document).ready(function(){
             success: function(r) {
                 if(r){
                     cargaTablaUsuarios();
+                }else{
+                    alert("hubo un error al intentar guarda el nuevo usuario");
+                    clearForm();
                 }
             },
             error:function(err){
@@ -65,4 +90,8 @@ $(document).ready(function(){
             }
         });
     });
+
+    function clearForm(){
+        $("#btn_limpiar").trigger("click");
+    }
 });
